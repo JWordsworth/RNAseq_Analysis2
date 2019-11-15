@@ -3,3 +3,4 @@
 *.fq
 *.bam
 *.~lock*
+.idea
