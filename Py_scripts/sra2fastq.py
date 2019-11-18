@@ -16,18 +16,22 @@ def create_run_scripts(sra_files, output_directory):
     :return:
     """
     if not isinstance(sra_files, list):
-        raise ValueError
+        raise ValueError('sra_files: {}\ntype: {}'.format(sra_files, type(sra_files)))
 
     job_scripts = []
     for sra_file in sra_files:
-        job_script = os.path.splitext(sra_file)
-        job_script = os.path.split(job_script)
+        print('submitting "{}"'.format(sra_file))
+        job_script = os.path.splitext(sra_file)[0]
+        job_script = os.path.split(job_script)[1]
+        job_script += '.sh'
 
         shebang = '#!/usr/bin/bash'
+        conda_cmd = 'conda activate py36'
+
         cmd = f'fastq-dump {sra_file} --outdir {output_directory} --split-files --readids -origfmt --clip --read-filter pass'
 
         with open(job_script, 'w') as f:
-            f.write(f'{shebang}\n{cmd}')
+            f.write(f'{shebang}\n{conda_cmd}\n{cmd}')
 
         job_scripts.append(job_script)
     return job_scripts
@@ -35,8 +39,7 @@ def create_run_scripts(sra_files, output_directory):
 
 def run_with_slurm(job_scripts):
     for script in job_scripts:
-        cmd = ['sbatch', script]
-        subprocess.check_call(cmd, shell=True)
+        os.system('sbatch {}'.format(script))
 
 
 if __name__ == '__main__':
@@ -45,6 +48,9 @@ if __name__ == '__main__':
     parser.add_argument('fastq_dir', help='The directory to put your fastq files')
     args = parser.parse_args()
 
-    job_scripts = create_run_scripts(args.sra_dir, args.fastq_dir)
+
+    sra_files = get_sra_files(args.sra_dir)
+
+    job_scripts = create_run_scripts(sra_files, args.fastq_dir)
 
     run_with_slurm(job_scripts)
