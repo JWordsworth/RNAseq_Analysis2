@@ -26,7 +26,7 @@ def build_job_scripts_single(fastq_files, index_dir, output_directory):
 
         temp_fastq_file = f'$TMPDIR/{accession}.fastq'
         temp_output = f'$TMPDIR/{accession}'
-        salmon = f'salmon quant -p 4 -l A -i {index_dir} --output {temp_output} --validateMappings -1 {temp_fastq_file}'
+        salmon = f'salmon quant -p 4 -l A -i {index_dir} --output {temp_output} --validateMappings -r {temp_fastq_file}'
 
         with open(job_script, 'w') as f:
             string = f'{shebang}\n{conda}\n{copy}\n{temp_fastq_file}\n{salmon}'
