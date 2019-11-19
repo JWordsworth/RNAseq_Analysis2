@@ -18,13 +18,16 @@ def process_accession_file(filename):
     # cater for the case when there is only 1 accession in the file
     if '\n' not in text:
         return [text]
-    
+
     accession_list = text.split('\n')
+
     accession_list = [i for i in accession_list if i != '']
+
     return accession_list
 
 
 def build_urls(accession_list):
+    base_url = r'ftp://ftp.ncbi.nlm.nih.gov/sra/sra-instant/reads/ByRun/sra/SRR'
     first_three = [i[:6] for i in accession_list]
     urls = []
     for i in range(len(accession_list)):
@@ -51,8 +54,8 @@ def create_lists_for_parallel_download(urls, N):
 
     # account for remainder
     remainder = list_size % N
-
     number_to_download_per_process = [n_per_process] * N
+
     for i in range(remainder):
         number_to_download_per_process[i] += 1
 
@@ -97,9 +100,9 @@ if __name__ == '__main__':
     parser.add_argument('--output_directory', type=str, default='.')
     args = parser.parse_args()
 
-    # fle = r'/media/njw262/DATA/RNAseq_Analysis/Py_scripts/srr_file'
+    fle = r'/media/njw262/DATA/RNAseq_Analysis/Py_scripts/srr_file'
 
-    base_url = r'ftp://ftp.ncbi.nlm.nih.gov/sra/sra-instant/reads/ByRun/sra/SRR'
+
 
     # The N variable determines how many separate processes to use for downloading in parallel
     # N = 4
@@ -114,8 +117,6 @@ if __name__ == '__main__':
     sublist_of_urls = create_lists_for_parallel_download(urls, args.N)
 
     # print(sublist_of_urls)
-
-    Q = mp.Queue()
 
     processes = [mp.Process(target=download_using_wget, args=(sublist, args.output_directory)) for sublist in sublist_of_urls]
 
