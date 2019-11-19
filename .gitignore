@@ -4,3 +4,4 @@
 *.bam
 *.~lock*
 .idea
+*.fa
